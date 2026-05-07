@@ -10,26 +10,33 @@ session.json の `.raw_answers`、`.theme`
 
 ## Phase A: 審査・選別
 
-### 審査基準（各10点満点、合計50点）
-1. **意外性スコア**: 想定外の切り口か
-2. **完成度スコア**: ボケ構造が完結しているか
-3. **簡潔性スコア**: 余分な言葉がないか
-4. **多様性ボーナス**: 採用セット全体でバリエーションがあるか（+5点）
-5. **芸人反応予測**: IPPONグランプリ審査員が挙手するイメージスコア
+### 審査基準（合計50点満点）
+
+個別評価 4軸 × 各10点 = 40点
+1. **意外性スコア** (0-10): 想定外の切り口か
+2. **完成度スコア** (0-10): ボケ構造が完結しているか（主語＋状況＋オチの三要素）
+3. **簡潔性スコア** (0-10): 余分な言葉がないか
+4. **芸人反応予測** (0-10): IPPONグランプリ審査員が即座にボタンを押すイメージスコア
+   - 聞いた瞬間に視覚的イメージが浮かぶか
+   - フリとボケの距離感が適切か（遠すぎず近すぎず）
+
+セット全体評価 = 10点
+5. **多様性ボーナス** (0-10): 採用7本のバリエーション（技法・軸・文体の重複が少ないほど高い）
 
 ### 足切り基準（自動除外）
-- 合計25点以下
-- 「〇〇かよ」「〇〇すぎる」で完結する凡庸パターン
+- 個別4軸の合計が30点未満（40点満点中）
+- ツッコミ語尾のみで完結する単文（〜かよ／〜すぎる／〜じゃん／〜だわ／〜なんだよ／〜すぎ 等）。構造を持たない回答は全て除外
 - 既存の有名ネタに酷似
 
 上位7本を `.selected_answers` に保存する。
+7本に満たない場合はその件数で公開すること（水増し禁止）。
 
 ---
 
 ## Phase B: MDファイル作成・GitHub公開
 
 ### ファイル命名
-`outputs/YYYY-MM-DD_oogiri_{お題の先頭10文字}.md`
+`outputs/YYYY-MM-DD_oogiri_{お題の先頭10文字（スラッシュ・スペース・記号は除去）}.md`
 
 ### MDファイルフォーマット
 
@@ -44,10 +51,13 @@ session.json の `.raw_answers`、`.theme`
 
 ## 🏆 殿堂入り候補
 
-| # | 回答 | 技法 | スコア |
+| # | 回答 | 技法 | スコア(個別/40) |
 |---|------|------|--------|
-| 1 | ... | 見立て | 47/55 |
+| 1 | ... | 見立て | 36/40 |
 ...
+
+**多様性ボーナス**: {X}/10  
+**合計最高スコア**: {Y}/50
 
 ---
 
@@ -62,11 +72,11 @@ session.json の `.raw_answers`、`.theme`
 ```bash
 git add outputs/
 git commit -m "feat: 大喜利回答 - {theme}"
-git push origin main
+git push origin HEAD:main
 ```
 
 ### 報告フォーマット（必須）
-リモートURLは `git remote get-url origin` で取得し、`/blob/main/outputs/{filename}` を付加する。
+リモートURLは `git remote get-url origin` で取得し、`.git` サフィックスを除去してから `/blob/main/outputs/{filename}` を付加する。
 
 ```
 ✅ 大喜利回答を公開しました
@@ -75,6 +85,20 @@ git push origin main
 📄 [回答ファイルを開く]({remote_url}/blob/main/outputs/{filename})
 ```
 
+## session.json 書き込み規約（厳守）
+全体上書きは禁止。以下の手順で部分更新する：
+
+```python
+import json
+with open('session.json', encoding='utf-8') as f:
+    d = json.load(f)
+d['selected_answers'] = [...]   # 当該フィールドのみ更新
+d['status'] = 'published'
+with open('session.json', 'w', encoding='utf-8') as f:
+    json.dump(d, f, ensure_ascii=False, indent=2)
+```
+他のフィールド（theme, created_at, interpretations, raw_answers 等）は変更・削除しないこと。
+
 ## 禁止事項
-- ブランチ作成禁止（main直接pushのみ）
+- ブランチ作成禁止（`git push origin HEAD:main` のみ）
 - 楽観コメント禁止
