@@ -23,14 +23,15 @@ session.json の `.interpretations`
 - 視点移動（モノ・動物・概念が語り手になる）
 
 ## 出力形式（JSON）
+session.json の `.raw_answers` キーに保存する。
+
 ```json
 {
-  "answers": [
+  "raw_answers": [
     { "axis": "字義通り", "technique": "見立て", "text": "..." }
   ]
 }
 ```
-session.json の `.raw_answers` に保存する。
 
 ## 禁止事項
 - コメント・感想禁止

@@ -5,9 +5,11 @@
 set -e
 THEME="${1:-}"
 SESSION_FILE="session.json"
+IS_CONTINUE=false
 
 # --continue フラグ処理
 if [ "$THEME" = "--continue" ]; then
+  IS_CONTINUE=true
   echo "🔄 セッション再開..."
   THEME=$(python3 -c "import json; d=json.load(open('$SESSION_FILE')); print(d.get('theme',''))")
   if [ -z "$THEME" ]; then
@@ -21,21 +23,24 @@ if [ -z "$THEME" ]; then
   exit 1
 fi
 
-# セッション初期化
-python3 -c "
-import json, datetime
+# セッション初期化（--continue 時はスキップ）
+if [ "$IS_CONTINUE" = false ]; then
+  OOGIRI_THEME="$THEME" OOGIRI_TS="$(date -u +%Y-%m-%dT%H:%M:%SZ)" python3 - <<'PYEOF'
+import json, os
 d = {
-  'theme': '''$THEME''',
-  'created_at': '$(date -u +%Y-%m-%dT%H:%M:%SZ)',
+  'theme': os.environ['OOGIRI_THEME'],
+  'created_at': os.environ['OOGIRI_TS'],
   'status': 'running',
   'interpretations': [],
   'raw_answers': [],
   'selected_answers': [],
-  'turn_count': 0
+  'turn_count': 0,
+  'topic_candidates': []
 }
-json.dump(d, open('$SESSION_FILE','w'), ensure_ascii=False, indent=2)
+json.dump(d, open('session.json', 'w'), ensure_ascii=False, indent=2)
 print('セッション初期化完了')
-"
+PYEOF
+fi
 
 echo ""
 echo "🎤 お題: $THEME"

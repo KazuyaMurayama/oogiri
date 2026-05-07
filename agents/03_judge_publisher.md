@@ -66,11 +66,13 @@ git push origin main
 ```
 
 ### 報告フォーマット（必須）
+リモートURLは `git remote get-url origin` で取得し、`/blob/main/outputs/{filename}` を付加する。
+
 ```
 ✅ 大喜利回答を公開しました
 
 🎤 お題: {theme}
-📄 [回答ファイルを開く](https://github.com/KazuyaMurayama/oogiri/blob/main/outputs/{filename})
+📄 [回答ファイルを開く]({remote_url}/blob/main/outputs/{filename})
 ```
 
 ## 禁止事項
