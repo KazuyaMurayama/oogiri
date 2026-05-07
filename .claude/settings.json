@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "Write(*)",
+      "Edit(*)",
+      "Read(*)",
+      "Bash(python3*)",
+      "Bash(git add*)",
+      "Bash(git commit*)",
+      "Bash(git push*)",
+      "Bash(git status*)",
+      "Bash(git log*)",
+      "Bash(git remote*)",
+      "Bash(mkdir*)"
+    ]
+  }
+}
