@@ -19,49 +19,53 @@ d = {
   'created_at': datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'),
   'status': 'topic_suggesting',
   'topic_candidates': [],
-  'interpretations': [],
-  'raw_answers': [],
-  'selected_answers': [],
-  'turn_count': 0
+  'interpretations': [], 'raw_answers': [], 'selected_answers': [], 'turn_count': 0
 }
 json.dump(d, open('session.json', 'w', encoding='utf-8'), ensure_ascii=False, indent=2)
 PYEOF
 
-# Agent00: お題候補をStep1〜Step3のみ実行し、topic_candidatesに保存
-# Step4（ユーザー入力受付）はシェル側で行うため Agent00 は提示まで
-claude --model claude-sonnet-4-6 \
-  --max-turns 4 \
+# Agent00: お題を生成・表示・session.jsonに保存。エラー（max-turns等）は || true で吸収
+claude --model claude-sonnet-4-6 --max-turns 5 \
   'agents/00_topic_suggester.md の Step1〜Step3 を実行してください。
-   上位6本のお題を画面に番号付きで提示し、さらに session.json の topic_candidates フィールドに
-   文字列の配列として保存してください（例: ["お題1", "お題2", ...]）。
-   Step4 は実行しないこと。番号の受け付けはシェルスクリプト側で行います。'
+   上位6本のお題を画面に番号付きで提示し、Write ツールで session.json の
+   topic_candidates フィールドを6本の文字列配列に更新してください。
+   git 操作・コミット・プッシュは一切行わないこと。Step4 も実行しないこと。' || true
 
 echo ""
 
-# ユーザー入力をシェルで受け付ける
-read -r -p "番号(1-6)または独自のお題を入力してください: " INPUT
-
-if [[ "$INPUT" =~ ^[1-6]$ ]]; then
-  THEME=$(python3 - <<PYEOF
-import json, sys
+# topic_candidates が保存されていれば番号入力、なければ手動入力にフォールバック
+CANDIDATE_COUNT=$(python3 -c "
+import json
 try:
     d = json.load(open('session.json', encoding='utf-8'))
-    candidates = d.get('topic_candidates', [])
-    idx = int('$INPUT') - 1
-    if 0 <= idx < len(candidates):
-        print(candidates[idx])
-    else:
-        print('')
+    print(len(d.get('topic_candidates', [])))
 except Exception:
-    print('')
+    print(0)
+")
+
+if [ "$CANDIDATE_COUNT" -eq 0 ]; then
+  echo "⚠️ 候補の自動取得に失敗しました。お題を直接入力してください。" >&2
+  read -r -p "お題を入力: " THEME
+else
+  read -r -p "番号(1-${CANDIDATE_COUNT})または独自のお題を入力してください: " INPUT
+
+  if [[ "$INPUT" =~ ^[1-6]$ ]]; then
+    THEME=$(python3 - "$INPUT" <<'PYEOF'
+import json, sys
+idx = int(sys.argv[1]) - 1
+with open('session.json', encoding='utf-8') as f:
+    d = json.load(f)
+candidates = d.get('topic_candidates', [])
+print(candidates[idx] if 0 <= idx < len(candidates) else '')
 PYEOF
 )
-  if [ -z "$THEME" ]; then
-    echo "⚠️ 候補が取得できませんでした。お題を直接入力してください。" >&2
-    read -r -p "お題を入力: " THEME
+    if [ -z "$THEME" ]; then
+      echo "⚠️ 候補が取得できませんでした。お題を直接入力してください。" >&2
+      read -r -p "お題を入力: " THEME
+    fi
+  else
+    THEME="$INPUT"
   fi
-else
-  THEME="$INPUT"
 fi
 
 if [ -z "$THEME" ]; then
