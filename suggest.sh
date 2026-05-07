@@ -27,8 +27,9 @@ PYEOF
 # Agent00: お題を生成・表示・session.jsonに保存。エラー（max-turns等）は || true で吸収
 claude --model claude-sonnet-4-6 --max-turns 5 \
   'agents/00_topic_suggester.md の Step1〜Step3 を実行してください。
-   上位6本のお題を画面に番号付きで提示し、Write ツールで session.json の
-   topic_candidates フィールドを6本の文字列配列に更新してください。
+   上位6本のお題を Step3 のフォーマット（番号・スター表示）で画面に表示してから、
+   Write ツールで session.json の topic_candidates フィールドを6本の文字列配列に更新してください。
+   必ず表示を先に行い、その後 session.json を更新すること。
    git 操作・コミット・プッシュは一切行わないこと。Step4 も実行しないこと。' || true
 
 echo ""
