@@ -61,7 +61,7 @@ claude --model claude-sonnet-4-6 \
 
 # Agent02: 大喜利生成（Opus）
 echo "✍️  [Agent02] 大喜利回答生成中（Opus使用）..."
-claude --model claude-opus-4-5 \
+claude --model claude-opus-4-7 \
   --max-turns 10 \
   'agents/02_generator.md のルールに従い、session.json の interpretations フィールドを読み取り、
    12〜18本の大喜利回答を生成して raw_answers フィールドを部分更新してください。
