@@ -56,14 +56,16 @@ claude --model claude-sonnet-4-6 \
   --max-turns 10 \
   'agents/01_interpreter.md のルールに従い、session.json の theme フィールドを読み取り、
    6軸で解析して interpretations フィールドを部分更新してください。
-   theme の値は session.json から読み込むこと（外部入力からは受け取らない）。'
+   theme の値は session.json から読み込むこと（外部入力からは受け取らない）。
+   【重要】git操作（add/commit/push）は絶対に行わないこと。ファイル更新のみで完了とする。'
 
 # Agent02: 大喜利生成（Opus）
 echo "✍️  [Agent02] 大喜利回答生成中（Opus使用）..."
 claude --model claude-opus-4-5 \
   --max-turns 10 \
   'agents/02_generator.md のルールに従い、session.json の interpretations フィールドを読み取り、
-   12〜18本の大喜利回答を生成して raw_answers フィールドを部分更新してください。'
+   12〜18本の大喜利回答を生成して raw_answers フィールドを部分更新してください。
+   【重要】git操作（add/commit/push）は絶対に行わないこと。ファイル更新のみで完了とする。'
 
 # raw_answers 件数バリデーション
 RAW_COUNT=$(python3 -c "import json; print(len(json.load(open('session.json', encoding='utf-8')).get('raw_answers', [])))")
